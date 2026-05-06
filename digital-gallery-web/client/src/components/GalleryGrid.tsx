@@ -13,6 +13,12 @@ export default function GalleryGrid({ images, isLoading = false, title = "Galler
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
+  const normalizeImageSrc = (url: string) => {
+    if (!url) return url;
+    // If DB stores app-relative paths (/uploads/... or /manus-storage/...), route via the current site origin.
+    return url.startsWith("/") ? `${window.location.origin}${url}` : url;
+  };
+
   const handleImageClick = (image: GalleryImage, index: number) => {
     setSelectedImage(image);
     setSelectedIndex(index);
@@ -84,7 +90,7 @@ export default function GalleryGrid({ images, isLoading = false, title = "Galler
               className="group relative overflow-hidden rounded-lg cursor-pointer aspect-square"
             >
               <img
-                src={image.imageUrl}
+                src={normalizeImageSrc(image.imageUrl)}
                 alt={image.title}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />

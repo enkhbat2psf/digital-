@@ -292,7 +292,9 @@ export default function UploadPanel({ albumId, images, onImageUploaded }: Upload
                       ) : (
                         <>
                           <img
-                            src={image.imageUrl}
+                            src={image.imageUrl.startsWith("/")
+                              ? `${window.location.origin}${image.imageUrl}`
+                              : image.imageUrl}
                             alt={image.title}
                             className="w-full h-32 object-cover"
                           />

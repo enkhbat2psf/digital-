@@ -22,6 +22,11 @@ export default function Lightbox({
 }: LightboxProps) {
   const [direction, setDirection] = useState<1 | -1>(1);
 
+  const normalizeImageSrc = (url: string) => {
+    if (!url) return url;
+    return url.startsWith("/") ? `${window.location.origin}${url}` : url;
+  };
+
   const imageVariants = useMemo(
     () => ({
       enter: (dir: 1 | -1) => ({
@@ -106,7 +111,7 @@ export default function Lightbox({
                   opacity: { duration: 0.18 },
                   scale: { duration: 0.18 },
                 }}
-                src={image.imageUrl}
+                src={normalizeImageSrc(image.imageUrl)}
                 alt={image.title}
                 className="w-full h-full object-contain"
                 draggable={false}
