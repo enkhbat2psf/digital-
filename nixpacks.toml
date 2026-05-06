@@ -1,0 +1,12 @@
+[phases.setup]
+# Railway uses Nixpacks. We pin the build/start commands for our monorepo.
+
+[phases.install]
+cmds = ["cd digital-gallery-web && npm install"]
+
+[phases.build]
+cmds = ["cd digital-gallery-web && npm run build"]
+
+[start]
+cmd = "cd digital-gallery-web && npm run start"
+
