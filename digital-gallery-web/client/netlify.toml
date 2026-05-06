@@ -9,6 +9,18 @@
   force = true
 
 [[redirects]]
+  from = "/uploads/*"
+  to = "https://digital-production-92ef.up.railway.app/uploads/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/manus-storage/*"
+  to = "https://digital-production-92ef.up.railway.app/manus-storage/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200

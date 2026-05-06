@@ -13,6 +13,19 @@
   status = 200
   force = true
 
+# Images are stored on the backend (/uploads or /manus-storage).
+[[redirects]]
+  from = "/uploads/*"
+  to = "https://digital-production-92ef.up.railway.app/uploads/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/manus-storage/*"
+  to = "https://digital-production-92ef.up.railway.app/manus-storage/:splat"
+  status = 200
+  force = true
+
 # SPA fallback (wouter routes like /album/:id)
 [[redirects]]
   from = "/*"
