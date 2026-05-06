@@ -71,12 +71,15 @@ export default function UploadPanel({ albumId, images, onImageUploaded }: Upload
 
     setIsUploading(true);
     try {
-      const buffer = await selectedFile.arrayBuffer();
-      const data = Array.from(new Uint8Array(buffer));
+      const dataUrl = preview;
+      const base64 = dataUrl?.includes("base64,") ? dataUrl.split("base64,")[1] : null;
+      if (!base64) {
+        throw new Error("Could not read file data. Please re-select the image and try again.");
+      }
       
       const { url, key } = await storageUploadMutation.mutateAsync({
         key: `gallery/${Date.now()}-${selectedFile.name}`,
-        data,
+        dataBase64: base64,
         contentType: selectedFile.type,
       });
 

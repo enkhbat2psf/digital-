@@ -9,7 +9,9 @@ export const storageRouter = router({
     .input(
       z.object({
         key: z.string(),
-        data: z.array(z.number()),
+        // Prefer base64 to avoid huge JSON payloads (number[] is extremely large).
+        dataBase64: z.string().optional(),
+        data: z.array(z.number()).optional(),
         contentType: z.string(),
       })
     )
@@ -17,7 +19,9 @@ export const storageRouter = router({
       if (!ENV.allowPublicUpload && !ctx.user) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
-      const buffer = Buffer.from(input.data);
+      const buffer = input.dataBase64
+        ? Buffer.from(input.dataBase64, "base64")
+        : Buffer.from(input.data ?? []);
       const { url, key } = await storagePut(input.key, buffer, input.contentType);
       const proto =
         (ctx.req.headers["x-forwarded-proto"] as string | undefined) ??
