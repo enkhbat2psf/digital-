@@ -36,6 +36,27 @@ const galleryImageUrlSchema = z
     { message: "Invalid image URL" },
   );
 
+function getPublicOriginFromRequest(ctx: TrpcContext): string {
+  const explicit = ENV.publicBackendUrl?.trim().replace(/\/+$/, "");
+  if (explicit) return explicit;
+  const proto =
+    (ctx.req.headers["x-forwarded-proto"] as string | undefined) ??
+    ctx.req.protocol ??
+    "https";
+  const host =
+    (ctx.req.headers["x-forwarded-host"] as string | undefined) ??
+    (ctx.req.headers["host"] as string | undefined) ??
+    "";
+  return host ? `${proto}://${host}` : "";
+}
+
+function normalizeImageUrl(ctx: TrpcContext, url: string): string {
+  if (!url) return url;
+  if (!url.startsWith("/")) return url;
+  const origin = getPublicOriginFromRequest(ctx);
+  return origin ? `${origin}${url}` : url;
+}
+
 function canManageGallery(user: User): boolean {
   if (user.role === "admin") return true;
   if (ENV.ownerOpenId && user.openId === ENV.ownerOpenId) return true;
@@ -94,8 +115,13 @@ export const appRouter = router({
   image: router({
     list: publicProcedure
       .input(z.object({ albumId: z.number() }))
-      .query(async ({ input }: { input: { albumId: number } }) => {
-        return getAlbumImages(input.albumId);
+      .query(async ({ ctx, input }: { ctx: TrpcContext; input: { albumId: number } }) => {
+        const images = await getAlbumImages(input.albumId);
+        // Always return absolute URLs so Netlify redirects/caches can't break images.
+        return images.map((img) => ({
+          ...img,
+          imageUrl: normalizeImageUrl(ctx, img.imageUrl),
+        }));
       }),
 
     upload: publicProcedure
@@ -125,11 +151,12 @@ export const appRouter = router({
         if (!canWrite(ctx)) {
           throw new Error("Only the owner can upload images");
         }
+        const imageUrl = normalizeImageUrl(ctx, input.imageUrl);
         return createGalleryImage({
           albumId: input.albumId,
           title: input.title,
           description: input.description,
-          imageUrl: input.imageUrl,
+          imageUrl,
           imageKey: input.imageKey,
           uploadedBy: ctx.user?.id ?? 0,
         });
