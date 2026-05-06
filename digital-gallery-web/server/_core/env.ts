@@ -7,6 +7,13 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  s3Endpoint: process.env.S3_ENDPOINT ?? "",
+  s3Region: process.env.S3_REGION ?? "auto",
+  s3Bucket: process.env.S3_BUCKET ?? "",
+  s3AccessKeyId: process.env.S3_ACCESS_KEY_ID ?? "",
+  s3SecretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? "",
+  // Public base URL that serves objects (e.g. https://cdn.example.com or https://<bucket>.<domain>)
+  s3PublicBaseUrl: process.env.S3_PUBLIC_BASE_URL ?? "",
   allowPublicUpload:
     (process.env.ALLOW_PUBLIC_UPLOAD ?? "").toLowerCase() === "true" ||
     process.env.ALLOW_PUBLIC_UPLOAD === "1",

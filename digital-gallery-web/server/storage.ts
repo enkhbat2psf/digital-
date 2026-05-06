@@ -3,6 +3,7 @@
 // Downloads return /manus-storage/{key} paths served via 307 redirect.
 
 import { ENV } from "./_core/env";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -32,6 +33,25 @@ function appendHashSuffix(relKey: string): string {
 
 const LOCAL_UPLOAD_DIR = path.resolve(import.meta.dirname, "..", "uploads");
 
+function getS3Config() {
+  const bucket = ENV.s3Bucket;
+  const endpoint = ENV.s3Endpoint;
+  const region = ENV.s3Region || "auto";
+  const accessKeyId = ENV.s3AccessKeyId;
+  const secretAccessKey = ENV.s3SecretAccessKey;
+  const publicBaseUrl = ENV.s3PublicBaseUrl;
+
+  if (!bucket || !endpoint || !accessKeyId || !secretAccessKey) {
+    return null;
+  }
+
+  return { bucket, endpoint, region, accessKeyId, secretAccessKey, publicBaseUrl };
+}
+
+function joinPublicBase(base: string, key: string) {
+  return `${base.replace(/\/+$/, "")}/${key.replace(/^\/+/, "")}`;
+}
+
 async function storagePutLocal(
   relKey: string,
   data: Buffer | Uint8Array | string,
@@ -50,6 +70,46 @@ export async function storagePut(
   data: Buffer | Uint8Array | string,
   contentType = "application/octet-stream",
 ): Promise<{ key: string; url: string }> {
+  const s3 = getS3Config();
+  if (s3) {
+    const key = appendHashSuffix(normalizeKey(relKey));
+    const client = new S3Client({
+      region: s3.region,
+      endpoint: s3.endpoint,
+      credentials: {
+        accessKeyId: s3.accessKeyId,
+        secretAccessKey: s3.secretAccessKey,
+      },
+      // R2 and many S3-compatible providers require path-style addressing.
+      forcePathStyle: true,
+    });
+
+    const body =
+      typeof data === "string" ? Buffer.from(data) : Buffer.from(data as any);
+
+    await client.send(
+      new PutObjectCommand({
+        Bucket: s3.bucket,
+        Key: key,
+        Body: body,
+        ContentType: contentType,
+      }),
+    );
+
+    if (s3.publicBaseUrl) {
+      return { key, url: joinPublicBase(s3.publicBaseUrl, key) };
+    }
+
+    if (ENV.isProduction) {
+      throw new Error(
+        "Storage public URL not configured: set S3_PUBLIC_BASE_URL to a public domain/URL that serves your bucket objects",
+      );
+    }
+
+    // Dev-only: best-effort URL (may not be publicly accessible)
+    return { key, url: joinPublicBase(s3.endpoint, `${s3.bucket}/${key}`) };
+  }
+
   // Dev fallback: allow local uploads when Forge is not configured.
   if (!ENV.forgeApiUrl || !ENV.forgeApiKey) {
     if (!ENV.isProduction) {
@@ -99,6 +159,14 @@ export async function storagePut(
 
 export async function storageGet(relKey: string): Promise<{ key: string; url: string }> {
   const key = normalizeKey(relKey);
+  const s3 = getS3Config();
+  if (s3) {
+    if (s3.publicBaseUrl) return { key, url: joinPublicBase(s3.publicBaseUrl, key) };
+    if (!ENV.isProduction) return { key, url: joinPublicBase(s3.endpoint, `${s3.bucket}/${key}`) };
+    throw new Error(
+      "Storage public URL not configured: set S3_PUBLIC_BASE_URL to a public domain/URL that serves your bucket objects",
+    );
+  }
   if (!ENV.forgeApiUrl || !ENV.forgeApiKey) {
     return { key, url: `/uploads/${key}` };
   }
