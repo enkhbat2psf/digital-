@@ -110,12 +110,12 @@ export async function storagePut(
     return { key, url: joinPublicBase(s3.endpoint, `${s3.bucket}/${key}`) };
   }
 
-  // Dev fallback: allow local uploads when Forge is not configured.
+  // Fallback: local uploads (dev, or explicitly allowed in prod)
   if (!ENV.forgeApiUrl || !ENV.forgeApiKey) {
-    if (!ENV.isProduction) {
+    if (!ENV.isProduction || ENV.allowLocalUploadsInProd) {
       return storagePutLocal(relKey, data);
     }
-    // Production should be explicit.
+    // Production should be explicit unless ALLOW_LOCAL_UPLOADS_IN_PROD is set.
     getForgeConfig();
   }
 

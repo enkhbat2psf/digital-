@@ -19,7 +19,17 @@ export const storageRouter = router({
       }
       const buffer = Buffer.from(input.data);
       const { url, key } = await storagePut(input.key, buffer, input.contentType);
-      return { url, key };
+      const proto =
+        (ctx.req.headers["x-forwarded-proto"] as string | undefined) ??
+        ctx.req.protocol ??
+        "https";
+      const host =
+        (ctx.req.headers["x-forwarded-host"] as string | undefined) ??
+        (ctx.req.headers["host"] as string | undefined) ??
+        "";
+      const origin = host ? `${proto}://${host}` : "";
+      const absoluteUrl = origin && url.startsWith("/") ? `${origin}${url}` : url;
+      return { url: absoluteUrl, key };
     }),
 
   get: publicProcedure

@@ -14,6 +14,9 @@ export const ENV = {
   s3SecretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? "",
   // Public base URL that serves objects (e.g. https://cdn.example.com or https://<bucket>.<domain>)
   s3PublicBaseUrl: process.env.S3_PUBLIC_BASE_URL ?? "",
+  allowLocalUploadsInProd:
+    (process.env.ALLOW_LOCAL_UPLOADS_IN_PROD ?? "").toLowerCase() === "true" ||
+    process.env.ALLOW_LOCAL_UPLOADS_IN_PROD === "1",
   allowPublicUpload:
     (process.env.ALLOW_PUBLIC_UPLOAD ?? "").toLowerCase() === "true" ||
     process.env.ALLOW_PUBLIC_UPLOAD === "1",
