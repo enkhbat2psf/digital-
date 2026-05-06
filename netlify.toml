@@ -1,0 +1,32 @@
+## Netlify config (repo root)
+## Netlify reads netlify.toml from the repository root.
+
+[build]
+  base = "digital-gallery-web"
+  command = "npm run build"
+  publish = "dist/public"
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://digital-production-92ef.up.railway.app/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/uploads/*"
+  to = "https://digital-production-92ef.up.railway.app/uploads/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/manus-storage/*"
+  to = "https://digital-production-92ef.up.railway.app/manus-storage/:splat"
+  status = 200
+  force = true
+
+# SPA fallback (wouter routes like /album/:id)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
