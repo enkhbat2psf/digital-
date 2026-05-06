@@ -1,0 +1,15 @@
+{
+  "name": "digital-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Monorepo wrapper to deploy digital-gallery-web on Railway/Render.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "postinstall": "npm --prefix digital-gallery-web install --legacy-peer-deps",
+    "build": "npm --prefix digital-gallery-web run build",
+    "start": "npm --prefix digital-gallery-web run start"
+  }
+}
+
