@@ -47,7 +47,9 @@ export async function autoMigrateIfNeeded(): Promise<void> {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) return;
 
-  const drizzleDir = path.resolve(import.meta.dirname, "..", "..", "drizzle");
+  // In production the app runs from `dist/`, so `import.meta.dirname` would resolve
+  // to `digital-gallery-web/dist` and break relative paths. Use cwd as the project root.
+  const drizzleDir = path.resolve(process.cwd(), "drizzle");
   let conn: Awaited<ReturnType<typeof createConnection>> | null = null;
 
   try {
