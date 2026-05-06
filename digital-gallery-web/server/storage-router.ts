@@ -31,7 +31,9 @@ export const storageRouter = router({
         (ctx.req.headers["x-forwarded-host"] as string | undefined) ??
         (ctx.req.headers["host"] as string | undefined) ??
         "";
-      const origin = host ? `${proto}://${host}` : "";
+      const explicitOrigin = ENV.publicBackendUrl?.trim().replace(/\/+$/, "");
+      const requestOrigin = host ? `${proto}://${host}` : "";
+      const origin = explicitOrigin || requestOrigin;
       const absoluteUrl = origin && url.startsWith("/") ? `${origin}${url}` : url;
       return { url: absoluteUrl, key };
     }),

@@ -5,6 +5,9 @@ export const ENV = {
   oAuthServerUrl: process.env.OAUTH_SERVER_URL ?? "",
   ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
   isProduction: process.env.NODE_ENV === "production",
+  // Public URL of this backend (used to form absolute URLs for stored objects).
+  // Example: https://digital-production-92ef.up.railway.app
+  publicBackendUrl: process.env.PUBLIC_BACKEND_URL ?? "",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
   s3Endpoint: process.env.S3_ENDPOINT ?? "",
