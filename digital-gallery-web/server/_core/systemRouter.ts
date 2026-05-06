@@ -1,8 +1,14 @@
 import { z } from "zod";
 import { notifyOwner } from "./notification";
 import { adminProcedure, publicProcedure, router } from "./trpc";
+import { ENV } from "./env";
 
 export const systemRouter = router({
+  config: publicProcedure.query(() => ({
+    allowPublicUpload: ENV.allowPublicUpload,
+    ownerOpenId: ENV.ownerOpenId || null,
+  })),
+
   health: publicProcedure
     .input(
       z.object({

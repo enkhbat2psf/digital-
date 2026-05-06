@@ -11,7 +11,11 @@ import { toast } from "sonner";
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
-  const publicUpload = import.meta.env.VITE_PUBLIC_UPLOAD === "true" || import.meta.env.VITE_PUBLIC_UPLOAD === "1";
+  const { data: config } = trpc.system.config.useQuery();
+  const publicUpload =
+    config?.allowPublicUpload ??
+    (import.meta.env.VITE_PUBLIC_UPLOAD === "true" ||
+      import.meta.env.VITE_PUBLIC_UPLOAD === "1");
   const canManage =
     isAuthenticated &&
     (user?.role === "admin" || user?.openId === import.meta.env.VITE_OWNER_OPEN_ID);

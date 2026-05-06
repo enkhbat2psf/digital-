@@ -11,7 +11,11 @@ export default function AlbumPage() {
   const albumId = useMemo(() => Number(params?.id ?? NaN), [params?.id]);
 
   const { user, isAuthenticated } = useAuth();
-  const publicUpload = import.meta.env.VITE_PUBLIC_UPLOAD === "true" || import.meta.env.VITE_PUBLIC_UPLOAD === "1";
+  const { data: config } = trpc.system.config.useQuery();
+  const publicUpload =
+    config?.allowPublicUpload ??
+    (import.meta.env.VITE_PUBLIC_UPLOAD === "true" ||
+      import.meta.env.VITE_PUBLIC_UPLOAD === "1");
   const canManage =
     isAuthenticated &&
     (user?.role === "admin" || user?.openId === import.meta.env.VITE_OWNER_OPEN_ID);
